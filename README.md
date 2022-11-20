@@ -1,4 +1,5 @@
 ## Azure Blob Storage Plug and Play Library
 
-- Exports class that can, when initialized with Azure configuration info, can be used to fetch data from and save data to Azure Datalake
+- Typescript Node.js package that exports class which ingests Azure configuration info and provides functions to consume and manage Microsoft Azure Data Lakes
+- Removes need for manual configuration of
 - Integrated with Azure Manged Identity Credential
