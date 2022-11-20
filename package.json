@@ -33,17 +33,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "module": "dist/azure-blob-storage.esm.js",
-  "size-limit": [
-    {
-      "path": "dist/azure-blob-storage.cjs.production.min.js",
-      "limit": "10 KB"
-    },
-    {
-      "path": "dist/azure-blob-storage.esm.js",
-      "limit": "10 KB"
-    }
-  ],
+  "module": "dist/pnp-blob-storage-arg.esm.js",
   "devDependencies": {
     "@size-limit/preset-small-lib": "^8.1.0",
     "husky": "^8.0.2",
