@@ -8,7 +8,7 @@ export type clientInput = {
 }
 
 export class AzureBlobClient {
-  blob_cs: string;
+  blob_cs: string;  
   managed_identity_toggle: boolean;
   managed_identity?: ManagedIdentityCredential;
   credential_chain?: ChainedTokenCredential;
