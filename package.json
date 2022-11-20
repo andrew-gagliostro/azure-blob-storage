@@ -1,7 +1,7 @@
 {
   "version": "0.1.1",
   "license": "MIT",
-  "name": "azure-blob-storage",
+  "name": "pnp-blob-storage-arg",
   "author": "andrew-gagliostro",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
