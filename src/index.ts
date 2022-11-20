@@ -1,4 +1,4 @@
-import { DataLakeServiceClient } from '@azure/storage-file-datalake';
+import { DataLakeServiceClient, FileReadResponse } from '@azure/storage-file-datalake';
 import { ChainedTokenCredential, DefaultAzureCredential, ManagedIdentityCredential } from '@azure/identity';
 import * as fs from "fs";
 
@@ -15,7 +15,7 @@ export class AzureBlobClient {
   default_credential?: DefaultAzureCredential;
 
 
-
+  //class constructor
   constructor(input: clientInput) {
     this.blob_cs = input.blob_cs;
     this.managed_identity_toggle = input.managed_identity_toggle //os.environ.get("managed_identity");
@@ -32,9 +32,7 @@ export class AzureBlobClient {
     path_base = path_full.split("/", 1)[0];
     file_name = path_full.split("/", 1)[1];
     datalake_service_client = DataLakeServiceClient.fromConnectionString(this.blob_cs);
-    //file_system_client = datalake_service_client.getFileSystemClient(fileSystemName);
-    // dir_client = file_system_client (path_base);
-    // file_client = dir_client.create_file(filename);
+
     file_system_client = datalake_service_client.getFileSystemClient(fileSystemName);
     dir_client = file_system_client.getDirectoryClient(path_base);
     file_client = dir_client.getFileClient(file_name)
@@ -48,11 +46,11 @@ export class AzureBlobClient {
       file_client.append(data, 0, data.length);
       file_client.flush(data.length);
     }
-
+    console.log(`Create and upload file ${path_full} successfully`);
     return true;
   }
 
-  public async fetch_document(path_full: string, fileSystemName: string) {
+  public async fetch_document(path_full: string, fileSystemName: string): Promise<Blob> {
     var path_base;
     path_base = path_full.split("/", 1)[0];
     file_name = path_full.split("/", 1)[1];
@@ -69,18 +67,24 @@ export class AzureBlobClient {
     dir_client = file_system_client.getDirectoryClient(path_base);
     file_client = dir_client.getFileClient(file_name)
 
-    // if (this.managed_identity_toggle === true) {
-    //   file_client = new DataLakeFileClient(file );
-    // } else {
-    //   file_client = DataLakeFileClient.from_connection_string(this.blob_cs, {
-    //     "file_system_name": "engine",
-    //     "file_path": path_full
-    //   });
-    //   download = file_client.download_file();
-    //   download.readinto(file);
-    // }
+    const downloaded_res: FileReadResponse = await file_client.read();
+    let y: Blob = new Blob();
+    let res_blob: Blob | undefined = await downloaded_res.contentAsBlob
+    let res_str:string = await this.blobToString(res_blob ? res_blob : y);
+    console.log(res_str);
 
-    return true;
+    return res_blob ? res_blob : y;
+  }
+
+  public async blobToString(blob: Blob): Promise<string> {
+    const fileReader = new FileReader();
+    return new Promise<string>((resolve, reject) => {
+      fileReader.onloadend = (ev: any) => {
+        resolve(ev.target!.result);
+      };
+      fileReader.onerror = reject;
+      fileReader.readAsText(blob);
+    });
   }
 
 }
