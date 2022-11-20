@@ -1,6 +1,7 @@
 {
   "version": "0.1.0",
-  "license": "MIT",
+  "name": "azure-blob-storage",
+  "author": "andrew-gagliostro",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
@@ -31,8 +32,6 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "azure-blob-storage",
-  "author": "andrew-gagliostro",
   "module": "dist/azure-blob-storage.esm.js",
   "size-limit": [
     {
