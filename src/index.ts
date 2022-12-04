@@ -1,24 +1,24 @@
 import { ChainedTokenCredential, DefaultAzureCredential, ManagedIdentityCredential } from '@azure/identity';
 import { BlobServiceClient } from '@azure/storage-blob';
 
-export type ClientInput = {
+export type ClientParams = {
   blob_cs: string,
   managed_identity_toggle: boolean,
 }
 
-export type ContainerBlobInfo = {
+export type ContainerBlobParams = {
   container_name: string,
   blob_names: string[]
 }
 
-export class AzureBlobClient {
+export class BlobClient {
   blob_cs: string;
   managed_identity_toggle: boolean;
   blob_service_client: BlobServiceClient;
 
 
   //class constructor
-  constructor(input: ClientInput) {
+  constructor(input: ClientParams) {
     this.blob_cs = input.blob_cs;
     this.managed_identity_toggle = input.managed_identity_toggle //os.environ.get("managed_identity");
     let default_credential = new DefaultAzureCredential();
@@ -32,7 +32,7 @@ export class AzureBlobClient {
     }
   }
 
-  public async store_blob(containerName: string, blobName: string, blob_obj: Buffer): Promise<boolean> {
+  public async storeBlob(containerName: string, blobName: string, blob_obj: Buffer): Promise<boolean> {
 
     try {
 
@@ -58,13 +58,13 @@ export class AzureBlobClient {
 
   }
 
-  public async fetch_blob(containerName: string, blobName: string): Promise<Buffer> {
+  public async fetchBlob(containerName: string, blobName: string): Promise<Buffer> {
 
     try {
       let containerClient = this.blob_service_client.getContainerClient(containerName);
       const blobClient = containerClient.getBlobClient(blobName);
       const downloadBlockBlobResponse = await blobClient.download();
-      const res: Buffer = await this.streamToBuffer(downloadBlockBlobResponse.readableStreamBody)
+      const res: Buffer = await this.convertStreamToBuffer(downloadBlockBlobResponse.readableStreamBody)
       console.log("Downloaded blob content");
       return res;
     }
@@ -75,7 +75,7 @@ export class AzureBlobClient {
   }
 
 
-  public async delete_blob(containerName: string, blobName: string): Promise<void> {
+  public async deleteBlob(containerName: string, blobName: string): Promise<void> {
     try {
       let containerClient = this.blob_service_client.getContainerClient(containerName);
       const blobClient = containerClient.getBlobClient(blobName);
@@ -89,7 +89,7 @@ export class AzureBlobClient {
   }
 
 
-  public async list_blobs(containerName: string): Promise<string[]> {
+  public async listBlobs(containerName: string): Promise<string[]> {
 
     let containerClient = this.blob_service_client.getContainerClient(containerName);
     try {
@@ -108,7 +108,7 @@ export class AzureBlobClient {
     }
   }
 
-  public async list_containers(): Promise<string[]> {
+  public async listContainers(): Promise<string[]> {
 
     try {
       let out: string[] = []
@@ -126,13 +126,13 @@ export class AzureBlobClient {
   }
 
 
-  public async list_containers_with_blobs(): Promise<ContainerBlobInfo[]> {
+  public async listContainersAndBlobs(): Promise<ContainerBlobParams[]> {
     try {
-      let out: ContainerBlobInfo[] = []
+      let out: ContainerBlobParams[] = []
       let i = 1;
       let containers = this.blob_service_client.listContainers();
       for await (const container of containers) {
-        let info: ContainerBlobInfo = { container_name: container.name, blob_names: [] }
+        let info: ContainerBlobParams = { container_name: container.name, blob_names: [] }
         let containerClient = this.blob_service_client.getContainerClient(container.name);
         let blobs = containerClient.listBlobsFlat();
         for await (const blob of blobs) {
@@ -149,7 +149,7 @@ export class AzureBlobClient {
   }
 
 
-  public async streamToBuffer(readableStream: any): Promise<Buffer> {
+  public async convertStreamToBuffer(readableStream: any): Promise<Buffer> {
     return new Promise<Buffer>((resolve, reject) => {
       const chunks: any[] = [];
       readableStream.on("data", (data: any) => {
